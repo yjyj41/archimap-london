@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #ECE7DC; }
+  input, textarea, select, button { font-family: inherit; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #B05432 !important; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #D2CCBC; border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  @keyframes panelIn { from { transform: translateX(36px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cardPop { from { transform: translateY(14px) scale(.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;background:#FBFAF6;font-family:'Space Grotesk',sans-serif;color:#211E17;overflow:hidden">
+
+  <header style="height:66px;flex:0 0 66px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid #DED9CC;background:#FBFAF6;z-index:5">
+    <div style="display:flex;align-items:center;gap:11px">
+      <div style="width:16px;height:16px;background:#B05432"></div>
+      <div style="display:flex;align-items:baseline;gap:9px">
+        <span style="font-weight:700;font-size:17px;letter-spacing:0.04em">ARCHIMAP</span>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.18em;color:#75705F">LONDON</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;align-items:center;gap:8px;background:#F4F1EA;border:1px solid #DED9CC;border-radius:40px;padding:0 14px;height:38px;width:280px">
+        <span style="font-family:'Space Mono',monospace;font-size:13px;color:#A39C8B">⌕</span>
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search building or architect" style="flex:1;border:none;background:transparent;font-size:13px;color:#211E17;padding:0" />
+      </div>
+      <button onClick="{{ onAddBuilding }}" style="display:flex;align-items:center;gap:7px;height:38px;padding:0 16px;border-radius:40px;border:1px solid #B05432;background:transparent;color:#B05432;font-size:13px;font-weight:600;cursor:pointer">
+        <span style="font-size:16px;line-height:1;margin-top:-1px">+</span> Add building
+      </button>
+      <div style="width:34px;height:34px;border-radius:50%;background:#211E17;color:#FBFAF6;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700">JK</div>
+    </div>
+  </header>
+
+  <div style="flex:1;display:flex;min-height:0;position:relative">
+
+    <aside style="width:384px;flex:0 0 384px;border-right:1px solid #DED9CC;background:#FBFAF6;display:flex;flex-direction:column;min-height:0;z-index:2">
+      <div style="padding:20px 22px 14px">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#A39C8B;margin-bottom:6px">CURATED · GREATER LONDON</div>
+        <h1 style="margin:0;font-family:'Newsreader',serif;font-weight:500;font-size:25px;line-height:1.15;color:#211E17">A field guide to the city's architecture</h1>
+      </div>
+      <div style="display:flex;gap:8px;padding:4px 22px 16px;overflow-x:auto;flex-wrap:wrap">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="6">
+          <button style="{{ f.style }}" onClick="{{ f.onClick }}">{{ f.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 22px 10px;border-bottom:1px solid #DED9CC">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.14em;color:#75705F">{{ countLabel }}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.14em;color:#A39C8B">A–Z · BY AREA</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;min-height:0">
+        <sc-for list="{{ list }}" as="b" hint-placeholder-count="6">
+          <div style="{{ b.style }}" onClick="{{ b.onClick }}" onMouseEnter="{{ b.onEnter }}" onMouseLeave="{{ b.onLeave }}">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#B05432;padding-top:3px;width:22px;flex:0 0 22px">{{ b.num }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:'Newsreader',serif;font-size:18px;font-weight:500;line-height:1.2;color:#211E17">{{ b.name }}</div>
+              <div style="font-family:'Space Mono',monospace;font-size:11px;color:#75705F;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.architect }}</div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:9px">
+                <span style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:#5C5749;background:#F0ECE2;border:1px solid #E2DCCD;padding:2px 8px;border-radius:3px">{{ b.styleLabel }}</span>
+                <span style="font-family:'Space Mono',monospace;font-size:11px;color:#A39C8B">{{ b.year }}</span>
+              </div>
+            </div>
+            <div style="flex:0 0 auto;display:flex;align-items:flex-start;padding-top:2px">
+              <sc-if value="{{ b.visited }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;color:#B05432;background:#F6E7DD;padding:3px 7px;border-radius:3px"><span style="width:6px;height:6px;border-radius:50%;background:#B05432;display:inline-block"></span>{{ b.visitCount }}</span>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </aside>
+
+    <main style="flex:1;position:relative;min-width:0;overflow:hidden;background:#ECE7DC;background-image:linear-gradient(rgba(33,30,23,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(33,30,23,0.045) 1px,transparent 1px);background-size:46px 46px">
+
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+        <rect x="29" y="34" width="11" height="8" rx="1.4" fill="#D8E0CF" opacity="0.7"></rect>
+        <rect x="35" y="17" width="9" height="6" rx="1.4" fill="#D8E0CF" opacity="0.7"></rect>
+        <rect x="44" y="54" width="5.5" height="4" rx="1" fill="#D8E0CF" opacity="0.7"></rect>
+        <rect x="64" y="46" width="6" height="5" rx="1.2" fill="#D8E0CF" opacity="0.7"></rect>
+        <path d="M -3 47 C 12 41, 22 52, 34 57 C 46 62, 52 52, 62 51 C 74 49.5, 88 56, 104 50" fill="none" stroke="#BFD0D2" stroke-width="6" stroke-linecap="round" opacity="0.9"></path>
+        <path d="M -3 47 C 12 41, 22 52, 34 57 C 46 62, 52 52, 62 51 C 74 49.5, 88 56, 104 50" fill="none" stroke="#A9BEC1" stroke-width="0.4" stroke-dasharray="1.4 1.4" opacity="0.7"></path>
+      </svg>
+
+      <div style="position:absolute;left:23%;top:8%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">HAMPSTEAD</div>
+      <div style="position:absolute;left:62%;top:25%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">THE CITY</div>
+      <div style="position:absolute;left:71%;top:18%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">SHOREDITCH</div>
+      <div style="position:absolute;left:33%;top:60%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">WESTMINSTER</div>
+      <div style="position:absolute;left:54%;top:64%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">SOUTHWARK</div>
+      <div style="position:absolute;left:22%;top:74%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.22em;color:#9A9384;pointer-events:none">BATTERSEA</div>
+      <div style="position:absolute;left:6%;top:18%;font-family:'Space Mono',monospace;font-size:13px;letter-spacing:0.22em;color:#BFAE8C;pointer-events:none;font-weight:700">R. THAMES</div>
+
+      {{ pinsLayer }}
+
+      <div style="position:absolute;left:22px;bottom:22px;background:rgba(251,250,246,0.92);border:1px solid #DED9CC;border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(4px)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#A39C8B">LEGEND</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5749"><span style="width:16px;height:16px;border-radius:50%;background:#211E17;border:1.5px solid #211E17"></span> Visited</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5749"><span style="width:16px;height:16px;border-radius:50%;background:#FBFAF6;border:1.5px solid #211E17"></span> To visit</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5C5749"><span style="width:16px;height:16px;border-radius:50%;background:#B05432;border:1.5px solid #B05432"></span> Selected</div>
+      </div>
+
+      <div style="position:absolute;right:22px;bottom:22px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none">
+        <div style="display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:11px;color:#8A8472">
+          <div style="width:46px;height:5px;border:1px solid #8A8472;border-top:none;display:flex"><div style="flex:1;border-right:1px solid #8A8472"></div><div style="flex:1"></div></div>
+          0 — 1 km
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#8A8472">N ↑</div>
+      </div>
+
+      <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:0;right:0;bottom:0;width:466px;background:#FBFAF6;border-left:1px solid #DED9CC;box-shadow:-18px 0 40px rgba(33,30,23,0.1);display:flex;flex-direction:column;z-index:4">
+          <button onClick="{{ onCloseDetail }}" style="position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid #DED9CC;background:rgba(251,250,246,0.85);color:#211E17;font-size:17px;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center">✕</button>
+          <div style="flex:1;overflow-y:auto;min-height:0">
+            <div style="height:248px;position:relative;background:repeating-linear-gradient(135deg,#E6E0D2 0 11px,#EEE8DB 11px 22px);display:flex;align-items:center;justify-content:center;border-bottom:1px solid #DED9CC">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#AFA790">{{ sPhotoCaption }}</span>
+              <span style="position:absolute;left:18px;bottom:16px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#FBFAF6;background:#211E17;padding:5px 10px;border-radius:3px">{{ sStyleLabel }}</span>
+            </div>
+            <div style="padding:26px 28px 36px">
+              <h2 style="margin:0;font-family:'Newsreader',serif;font-weight:500;font-size:33px;line-height:1.1;color:#211E17">{{ sName }}</h2>
+              <div style="font-family:'Space Mono',monospace;font-size:13px;color:#75705F;margin-top:10px">{{ sArchitect }}</div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#DED9CC;border:1px solid #DED9CC;border-radius:6px;overflow:hidden;margin:22px 0 24px">
+                <div style="background:#FBFAF6;padding:13px 15px"><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#A39C8B">COMPLETED</div><div style="font-family:'Newsreader',serif;font-size:18px;color:#211E17;margin-top:3px">{{ sYear }}</div></div>
+                <div style="background:#FBFAF6;padding:13px 15px"><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#A39C8B">AREA</div><div style="font-family:'Newsreader',serif;font-size:18px;color:#211E17;margin-top:3px">{{ sDistrict }}</div></div>
+                <div style="background:#FBFAF6;padding:13px 15px"><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#A39C8B">STYLE</div><div style="font-family:'Newsreader',serif;font-size:18px;color:#211E17;margin-top:3px">{{ sStyleLabel }}</div></div>
+                <div style="background:#FBFAF6;padding:13px 15px"><div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#A39C8B">COORDINATES</div><div style="font-family:'Space Mono',monospace;font-size:13px;color:#211E17;margin-top:6px">{{ sCoords }}</div></div>
+              </div>
+
+              <p style="margin:0;font-family:'Newsreader',serif;font-size:17px;line-height:1.62;color:#423E34">{{ sBlurb }}</p>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin:30px 0 16px;padding-top:22px;border-top:1px solid #DED9CC">
+                <span style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.14em;color:#75705F">MY VISITS · {{ sVisitCount }}</span>
+                <button onClick="{{ onOpenAddVisit }}" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:40px;border:none;background:#B05432;color:#FBFAF6;font-size:12px;font-weight:600;cursor:pointer"><span style="font-size:15px;line-height:1;margin-top:-1px">+</span> Log a visit</button>
+              </div>
+
+              <sc-if value="{{ noVisits }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px dashed #D2CCBC;border-radius:6px;padding:22px;text-align:center;font-family:'Space Mono',monospace;font-size:12px;color:#A39C8B;line-height:1.6">No visits logged yet.<br/>Add a date, a photo and a note from your trip.</div>
+              </sc-if>
+              <sc-if value="{{ hasVisits }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <sc-for list="{{ sVisits }}" as="v" hint-placeholder-count="1">
+                    <div style="display:flex;gap:14px;border:1px solid #DED9CC;border-radius:6px;padding:12px;background:#FCFBF7">
+                      <div style="flex:0 0 70px;height:70px;border-radius:4px;background:repeating-linear-gradient(135deg,#E6E0D2 0 8px,#EEE8DB 8px 16px);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;color:#AFA790;text-align:center">{{ v.caption }}</div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.08em;color:#B05432">{{ v.date }}</div>
+                        <div style="font-family:'Newsreader',serif;font-size:15px;line-height:1.5;color:#423E34;margin-top:5px">{{ v.note }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ showVisitModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onCloseModal }}" style="position:fixed;inset:0;background:rgba(28,25,19,0.42);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div onClick="{{ stop }}" style="width:480px;max-width:92vw;background:#FBFAF6;border-radius:10px;box-shadow:0 24px 60px rgba(0,0,0,0.3);padding:30px">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#B05432;margin-bottom:7px">LOG A VISIT</div>
+        <h3 style="margin:0 0 22px;font-family:'Newsreader',serif;font-weight:500;font-size:24px;color:#211E17">{{ visitBuildingName }}</h3>
+        <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">DATE OF VISIT</label>
+        <input type="date" value="{{ vDate }}" onChange="{{ onVDate }}" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 13px;font-size:14px;color:#211E17;background:#FCFBF7;margin-bottom:18px" />
+        <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">NOTES</label>
+        <textarea value="{{ vNote }}" onChange="{{ onVNote }}" placeholder="What stood out? Light, materials, the approach…" style="width:100%;height:92px;border:1px solid #DED9CC;border-radius:6px;padding:11px 13px;font-size:14px;line-height:1.5;color:#211E17;background:#FCFBF7;resize:none;font-family:'Newsreader',serif;margin-bottom:18px"></textarea>
+        <div style="display:flex;align-items:center;gap:11px;border:1px dashed #D2CCBC;border-radius:6px;padding:14px;margin-bottom:24px;background:#FCFBF7">
+          <div style="width:42px;height:42px;border-radius:4px;background:repeating-linear-gradient(135deg,#E6E0D2 0 7px,#EEE8DB 7px 14px)"></div>
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#A39C8B">Drag a photo here, or click to upload</span>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+          <button onClick="{{ onCloseModal }}" style="height:42px;padding:0 20px;border-radius:40px;border:1px solid #DED9CC;background:transparent;color:#5C5749;font-size:14px;font-weight:500;cursor:pointer">Cancel</button>
+          <button onClick="{{ onSaveVisit }}" style="{{ saveVisitStyle }}" onMouseEnter="{{ noop }}">Save visit</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showBuildingModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onCloseModal }}" style="position:fixed;inset:0;background:rgba(28,25,19,0.42);display:flex;align-items:center;justify-content:center;z-index:20">
+      <div onClick="{{ stop }}" style="width:520px;max-width:92vw;background:#FBFAF6;border-radius:10px;box-shadow:0 24px 60px rgba(0,0,0,0.3);padding:30px">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#B05432;margin-bottom:7px">ADD TO THE MAP</div>
+        <h3 style="margin:0 0 22px;font-family:'Newsreader',serif;font-weight:500;font-size:24px;color:#211E17">A new building to discover</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+          <div style="grid-column:1 / -1">
+            <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">BUILDING NAME</label>
+            <input value="{{ bName }}" onChange="{{ onBName }}" placeholder="e.g. Alexandra Road Estate" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 13px;font-size:14px;background:#FCFBF7" />
+          </div>
+          <div>
+            <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">ARCHITECT</label>
+            <input value="{{ bArchitect }}" onChange="{{ onBArchitect }}" placeholder="e.g. Neave Brown" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 13px;font-size:14px;background:#FCFBF7" />
+          </div>
+          <div>
+            <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">YEAR</label>
+            <input value="{{ bYear }}" onChange="{{ onBYear }}" placeholder="e.g. 1978" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 13px;font-size:14px;background:#FCFBF7" />
+          </div>
+          <div>
+            <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">STYLE</label>
+            <select value="{{ bStyle }}" onChange="{{ onBStyle }}" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 11px;font-size:14px;background:#FCFBF7;color:#211E17">
+              <option>Brutalist</option>
+              <option>High-Tech</option>
+              <option>Modern</option>
+              <option>Contemporary</option>
+              <option>Historic</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#75705F;margin-bottom:7px">AREA</label>
+            <input value="{{ bDistrict }}" onChange="{{ onBDistrict }}" placeholder="e.g. Camden" style="width:100%;height:44px;border:1px solid #DED9CC;border-radius:6px;padding:0 13px;font-size:14px;background:#FCFBF7" />
+          </div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:#A39C8B;margin-bottom:22px;line-height:1.5">A pin will be dropped on the map. You can log visits, photos and notes once it's added.</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+          <button onClick="{{ onCloseModal }}" style="height:42px;padding:0 20px;border-radius:40px;border:1px solid #DED9CC;background:transparent;color:#5C5749;font-size:14px;font-weight:500;cursor:pointer">Cancel</button>
+          <button onClick="{{ onSaveBuilding }}" style="{{ saveBuildingStyle }}">Add to map</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    filter: 'all',
+    query: '',
+    selectedId: null,
+    hovered: null,
+    modal: null,
+    visitForm: { date: '', note: '' },
+    bForm: { name: '', architect: '', year: '', style: 'Contemporary', district: '' },
+    buildings: [
+      { id:'barbican', num:1, name:'Barbican Estate', architect:'Chamberlin, Powell & Bon', year:1976, styleLabel:'Brutalist', cat:'brutalist', district:'City of London', coords:'51.5200, -0.0937', x:58, y:32,
+        blurb:'A monumental residential and arts complex of board-marked concrete, raised on a wartime bomb site. Its elevated walkways, lakeside terraces and three forty-storey towers define post-war London\u2019s civic ambition.',
+        visits:[{ date:'2025-09-14', note:'Caught the light on the lakeside terrace at golden hour \u2014 the concrete glows far warmer than the photographs suggest.' }] },
+      { id:'national', num:2, name:'National Theatre', architect:'Denys Lasdun', year:1976, styleLabel:'Brutalist', cat:'brutalist', district:'South Bank', coords:'51.5071, -0.1146', x:46, y:50,
+        blurb:'Lasdun\u2019s stratified concrete terraces step down toward the Thames like geological strata. A polarising icon of British Brutalism, lit purple along the river at night.', visits:[] },
+      { id:'trellick', num:3, name:'Trellick Tower', architect:'Ern\u0151 Goldfinger', year:1972, styleLabel:'Brutalist', cat:'brutalist', district:'Kensal Town', coords:'51.5240, -0.2060', x:14, y:26,
+        blurb:'A thirty-one storey slab with its service tower held apart and linked by sky-bridges. Once notorious, now Grade II* listed and fiercely loved by its residents.', visits:[] },
+      { id:'lloyds', num:4, name:'Lloyd\u2019s Building', architect:'Richard Rogers', year:1986, styleLabel:'High-Tech', cat:'hightech', district:'City of London', coords:'51.5128, -0.0822', x:66, y:38,
+        blurb:'Rogers turned the building inside out \u2014 lifts, ducts and staircases worn on the exterior \u2014 leaving uninterrupted trading floors within. High-Tech architecture at its most uncompromising.', visits:[] },
+      { id:'gherkin', num:5, name:'30 St Mary Axe', architect:'Foster + Partners', year:2003, styleLabel:'High-Tech', cat:'hightech', district:'City of London', coords:'51.5145, -0.0803', x:69, y:36,
+        blurb:'The Gherkin\u2019s aerodynamic form, spiralling diagrid and naturally ventilated light-wells reshaped the City skyline and the way tall buildings breathe.', visits:[] },
+      { id:'bloomberg', num:6, name:'Bloomberg HQ', architect:'Foster + Partners', year:2017, styleLabel:'Contemporary', cat:'contemporary', district:'City of London', coords:'51.5128, -0.0918', x:60, y:43,
+        blurb:'A deep-plan block of sandstone and bronze threaded by a spiralling ramp, lauded for its environmental performance. Winner of the 2018 Stirling Prize.',
+        visits:[{ date:'2025-11-02', note:'Walked the bronze vortex ramp \u2014 quietly the most generous office interior in the City.' }] },
+      { id:'tate', num:7, name:'Tate Modern', architect:'Herzog & de Meuron', year:2000, styleLabel:'Contemporary', cat:'contemporary', district:'Bankside', coords:'51.5076, -0.0994', x:57, y:52,
+        blurb:'A conversion of Bankside Power Station, its Turbine Hall now a vast civic room. The 2016 Switch House added a folded, perforated-brick tower behind.', visits:[] },
+      { id:'shard', num:8, name:'The Shard', architect:'Renzo Piano', year:2012, styleLabel:'Contemporary', cat:'contemporary', district:'London Bridge', coords:'51.5045, -0.0865', x:61, y:55,
+        blurb:'Piano\u2019s tapering splinter of glass, briefly the tallest building in Western Europe. Eight inclined facades rise and fragment, never quite meeting, at the open summit.', visits:[] },
+      { id:'isokon', num:9, name:'Isokon Building', architect:'Wells Coates', year:1934, styleLabel:'Modern', cat:'modern', district:'Belsize Park', coords:'51.5470, -0.1680', x:30, y:10,
+        blurb:'A streamlined concrete apartment block built as a manifesto for minimal modern living. Home to Bauhaus \u00e9migr\u00e9s including Walter Gropius and Marcel Breuer.', visits:[] },
+      { id:'battersea', num:10, name:'Battersea Power Station', architect:'Giles Gilbert Scott', year:1935, styleLabel:'Historic', cat:'historic', district:'Nine Elms', coords:'51.4817, -0.1440', x:30, y:68,
+        blurb:'Scott\u2019s cathedral of power with its four fluted chimneys, long derelict and now reborn as homes and shops. A listed Art Deco titan on the south bank.', visits:[] },
+      { id:'stpauls', num:11, name:'St Paul\u2019s Cathedral', architect:'Sir Christopher Wren', year:1710, styleLabel:'Historic', cat:'historic', district:'City of London', coords:'51.5138, -0.0984', x:55, y:44,
+        blurb:'Wren\u2019s English Baroque masterpiece, its dome a symbol of the City for three centuries. It survived the Blitz to anchor London\u2019s protected sightlines.', visits:[] }
+    ]
+  };
+
+  pad(n) { return String(n).padStart(2, '0'); }
+
+  fmtDate(iso) {
+    if (!iso || iso.indexOf('-') < 0) return iso || '';
+    const p = iso.split('-');
+    const mon = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][parseInt(p[1],10)-1] || '';
+    return parseInt(p[2],10) + ' ' + mon + ' ' + p[0];
+  }
+
+  select(id) { this.setState({ selectedId: id }); }
+
+  setBForm(k, v) { this.setState({ bForm: { ...this.state.bForm, [k]: v } }); }
+
+  saveVisit() {
+    const { selectedId, visitForm, buildings } = this.state;
+    if (!visitForm.date) return;
+    const nb = buildings.map(b => b.id === selectedId
+      ? { ...b, visits: [...b.visits, { date: visitForm.date, note: visitForm.note.trim() || 'Visited.' }] } : b);
+    this.setState({ buildings: nb, modal: null, visitForm: { date: '', note: '' } });
+  }
+
+  saveBuilding() {
+    const { bForm, buildings } = this.state;
+    if (!bForm.name.trim()) return;
+    const catMap = { Brutalist:'brutalist', 'High-Tech':'hightech', Modern:'modern', Contemporary:'contemporary', Historic:'historic' };
+    const i = buildings.length;
+    const nb = {
+      id: 'b' + Date.now(), num: i + 1, name: bForm.name.trim(),
+      architect: bForm.architect.trim() || 'Unknown', year: bForm.year.trim() || '\u2014',
+      styleLabel: bForm.style, cat: catMap[bForm.style] || 'contemporary',
+      district: bForm.district.trim() || 'London', coords: '\u2014',
+      x: 44 + (i % 5) * 4, y: 40 + (i % 3) * 5,
+      blurb: 'A building you added to the map. Log your visits, photos and notes here as you explore it.',
+      visits: []
+    };
+    this.setState({ buildings: [...buildings, nb], modal: null, selectedId: nb.id });
+  }
+
+  buildPins(list, selId, hovId) {
+    return React.createElement('div', { style: { position:'absolute', inset:0, pointerEvents:'none' } },
+      list.map(b => {
+        const sel = b.id === selId, hov = b.id === hovId, visited = b.visits.length > 0;
+        const marker = React.createElement('div', { style: {
+          width:'30px', height:'30px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center',
+          fontFamily:"'Space Mono', monospace", fontSize:'12px', fontWeight:700,
+          background: sel ? '#B05432' : (visited ? '#211E17' : '#FBFAF6'),
+          color: (sel || visited) ? '#FBFAF6' : '#211E17',
+          border: '1.5px solid ' + (sel ? '#B05432' : (hov ? '#B05432' : '#211E17')),
+          boxShadow: '0 2px 7px rgba(33,30,23,0.22)', transition: 'all .15s ease'
+        } }, this.pad(b.num));
+        const kids = [marker];
+        if (sel || hov) {
+          kids.push(React.createElement('div', { key:'l', style: {
+            position:'absolute', top:'37px', left:'50%', transform:'translateX(-50%)', whiteSpace:'nowrap',
+            background:'#211E17', color:'#FBFAF6', padding:'5px 10px', borderRadius:'4px', fontSize:'12px',
+            fontFamily:"'Space Grotesk', sans-serif", fontWeight:500, boxShadow:'0 3px 10px rgba(0,0,0,0.22)'
+          } }, b.name));
+        }
+        return React.createElement('button', {
+          key: b.id,
+          onClick: () => this.select(b.id),
+          onMouseEnter: () => this.setState({ hovered: b.id }),
+          onMouseLeave: () => this.setState({ hovered: null }),
+          style: {
+            position:'absolute', left:b.x+'%', top:b.y+'%',
+            transform:'translate(-50%,-50%)' + (sel ? ' scale(1.12)' : ''),
+            pointerEvents:'auto', cursor:'pointer', background:'none', border:'none', padding:0, zIndex: sel ? 3 : (hov ? 2 : 1)
+          }
+        }, kids);
+      })
+    );
+  }
+
+  renderVals() {
+    const { buildings, filter, query, selectedId, hovered, modal, visitForm, bForm } = this.state;
+    const q = query.trim().toLowerCase();
+    const match = b => (filter === 'all' || b.cat === filter)
+      && (q === '' || b.name.toLowerCase().includes(q) || b.architect.toLowerCase().includes(q));
+    const filtered = buildings.filter(match);
+
+    let pinSrc = filtered.slice();
+    if (selectedId && !pinSrc.some(b => b.id === selectedId)) {
+      const s = buildings.find(b => b.id === selectedId);
+      if (s) pinSrc.push(s);
+    }
+    const pinsLayer = this.buildPins(pinSrc, selectedId, hovered);
+
+    const list = filtered.map(b => {
+      const sel = b.id === selectedId, hov = b.id === hovered, visited = b.visits.length > 0;
+      return {
+        id: b.id, num: this.pad(b.num), name: b.name, architect: b.architect, year: String(b.year),
+        styleLabel: b.styleLabel, visited, visitCount: b.visits.length,
+        style: {
+          display:'flex', gap:'14px', padding:'15px 18px', cursor:'pointer', borderBottom:'1px solid #DED9CC',
+          background: sel ? '#F4E6DD' : (hov ? '#F4F1EA' : 'transparent'), transition:'background .12s'
+        },
+        onClick: () => this.select(b.id),
+        onEnter: () => this.setState({ hovered: b.id }),
+        onLeave: () => this.setState({ hovered: null })
+      };
+    });
+
+    const filters = [['all','All'],['brutalist','Brutalist'],['hightech','High-Tech'],['modern','Modern'],['contemporary','Contemporary'],['historic','Historic']].map(([k,l]) => {
+      const active = filter === k;
+      return {
+        key: k, label: l,
+        style: {
+          padding:'7px 14px', borderRadius:'40px', whiteSpace:'nowrap', cursor:'pointer',
+          fontFamily:"'Space Grotesk', sans-serif", fontSize:'13px', fontWeight:500,
+          border:'1px solid ' + (active ? '#211E17' : '#DED9CC'),
+          background: active ? '#211E17' : 'transparent', color: active ? '#FBFAF6' : '#75705F', transition:'all .12s'
+        },
+        onClick: () => this.setState({ filter: k })
+      };
+    });
+
+    const sel = buildings.find(b => b.id === selectedId) || null;
+    let s;
+    if (sel) {
+      s = {
+        hasSelected: true, noVisits: sel.visits.length === 0, hasVisits: sel.visits.length > 0,
+        sName: sel.name, sArchitect: sel.architect, sYear: String(sel.year), sStyleLabel: sel.styleLabel,
+        sDistrict: sel.district, sCoords: sel.coords, sBlurb: sel.blurb,
+        sPhotoCaption: 'PHOTO \u2014 ' + sel.name, sVisitCount: sel.visits.length,
+        sVisits: sel.visits.map((v, i) => ({ date: this.fmtDate(v.date), note: v.note, caption: 'PHOTO ' + (i + 1) })),
+        visitBuildingName: sel.name
+      };
+    } else {
+      s = { hasSelected: false, noVisits: false, hasVisits: false, sVisits: [], visitBuildingName: '' };
+    }
+
+    const primaryBtn = (enabled) => ({
+      height:'42px', padding:'0 22px', borderRadius:'40px', border:'none',
+      background: enabled ? '#B05432' : '#D8C9C0', color:'#FBFAF6', fontSize:'14px', fontWeight:600,
+      cursor: enabled ? 'pointer' : 'not-allowed', fontFamily:"'Space Grotesk', sans-serif"
+    });
+
+    return {
+      filters, list, countLabel: filtered.length + ' SITES',
+      query, onQuery: e => this.setState({ query: e.target.value }),
+      onAddBuilding: () => this.setState({ modal: 'building', bForm: { name:'', architect:'', year:'', style:'Contemporary', district:'' } }),
+      pinsLayer,
+      onCloseDetail: () => this.setState({ selectedId: null }),
+      onOpenAddVisit: () => this.setState({ modal: 'visit', visitForm: { date:'', note:'' } }),
+      ...s,
+      showVisitModal: modal === 'visit', showBuildingModal: modal === 'building',
+      onCloseModal: () => this.setState({ modal: null }),
+      stop: e => e.stopPropagation(),
+      vDate: visitForm.date, vNote: visitForm.note,
+      onVDate: e => this.setState({ visitForm: { ...this.state.visitForm, date: e.target.value } }),
+      onVNote: e => this.setState({ visitForm: { ...this.state.visitForm, note: e.target.value } }),
+      onSaveVisit: () => this.saveVisit(), saveVisitStyle: primaryBtn(!!visitForm.date),
+      bName: bForm.name, bArchitect: bForm.architect, bYear: bForm.year, bStyle: bForm.style, bDistrict: bForm.district,
+      onBName: e => this.setBForm('name', e.target.value),
+      onBArchitect: e => this.setBForm('architect', e.target.value),
+      onBYear: e => this.setBForm('year', e.target.value),
+      onBStyle: e => this.setBForm('style', e.target.value),
+      onBDistrict: e => this.setBForm('district', e.target.value),
+      onSaveBuilding: () => this.saveBuilding(), saveBuildingStyle: primaryBtn(bForm.name.trim() !== ''),
+      noop: () => {}
+    };
+  }
+}
+</script>
+</body>
+</html>
